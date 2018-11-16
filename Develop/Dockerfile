@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         cmake \
         libudev-dev \
         libsqlite3-dev \
-        libssl-dev \
+        libssl1.0-dev \
         nginx \
         pkg-config \
         python \
@@ -61,6 +61,9 @@ COPY nginx.conf /etc/nginx/
 
 # Copy supervisord config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Change SDL Policy
+RUN sed -i -e 's/"groups": \["Base-4"\]/"groups": ["Base-6", "Emergency-1", "Location-1", "DrivingCharacteristics-3", "VehicleInfo-3"]/g' sdl_preloaded_pt.json
 
 # Expose the following ports
 #   3001: Exposes Core's file system

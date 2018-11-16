@@ -7,7 +7,7 @@ FROM buildpack-deps:scm
 
 MAINTAINER Corey Maylone version:1.0
 
-ENV CORE_BRANCH=master \
+ENV CORE_BRANCH=5.0.0 \
     CORE_NETWORK_INTERFACE=eth0 \
     HMI_WEBSOCKET_ADDRESS=127.0.0.1:8087 \
     CORE_CWD=/usr/sdl \
@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         cmake \
         libudev-dev \
         libsqlite3-dev \
-        libssl-dev \
+        libssl1.0-dev \
         nginx \
         python \
         sudo \
@@ -61,12 +61,15 @@ COPY nginx.conf /etc/nginx/
 # Copy supervisord config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Change SDL Policy
+RUN sed -i -e 's/"groups": \["Base-4"\]/"groups": ["Base-6", "Emergency-1", "Location-1", "DrivingCharacteristics-3", "VehicleInfo-3"]/g' sdl_preloaded_pt.json
+
 # Expose the following ports
 #   3001: Exposes Core's file system
 #   8087:  Expose SDL Core's Web Socket port. Used to comunicate with the HMI
 #   8080:  Returns index.html of HMI Core
 #   12345: Expose SDL Core's primary port. Used to communicate with the SDL Core instance over TCP
-EXPOSE 3001 8080 8087 12345 
+EXPOSE 3001 8080 8087 12345
 
 # Run the start script that will launch SDL Core!
 ENTRYPOINT $PWD/setup.sh
